@@ -1,38 +1,95 @@
-# Source code for: Scaling on-chip photonic neural processors using arbitrarily programmable wave propagation
+This repository contains demo code associated with our paper *Scaling on-chip photonic neural processors using arbitrarily programmable wave propagation*.
+It enables straightforward exploration of 2D-programmable waveguides, i.e. waveguides whose refractive index distribution $n(x,z)$ can be arbitrarily programmed in space. 
+The code is intentionally kept minimal, focusing on the essential elements of such devices: 
+- Solving a unidirectional wave equation
+- Using either user-defined or inverse-designed refractive index distributions
+- Implemented in *PyTorch* for GPU- and auto-differentiation-support
+- Integration with *Physics-Aware-Training* to emulate experiments which are not differentiable
 
-## Overview
-We propose and demonstrate a device, a *2D-programmable waveguide* whose refractive index as a function of space, $n(x,z)$, can be rapidly reprogrammed, allowing arbitrary control over the wave propagation in the device [1]. We trained the device with a hybrid in-situ, in-silico backpropagation algorithm [2] to perform neural network inference. In particular, we achieved 96\% accuracy on vowel classification and 86\% accuracy on $7 \times 7$-pixel MNIST handwritten-digit classification, with no trained digital-electronic pre- or post-processing.
+However, it is not a full reference implementation of the code we used in experiment, which may instead be found in the associated [Zenodo](https://doi.org/10.5281/zenodo.10775721).
+<p align="center">
+<img src="https://github.com/user-attachments/assets/5a1bd570-0beb-4959-837f-6a1d0b965d23" width="800">
+</p>
 
-In this repository, we provide the source code used to generate the results in our paper, written in Python and utilizing the PyTorch library for machine learning tasks. Designed for execution in a Jupyter notebook environment, this repository includes source code for simulations and experiments. Primarily intended for internal use, the code lacks detailed documentation, and the experimental portion presupposes connectivity to specific experimental devices, such as spatial-light modulators and cameras. The simulation code is self-contained and should run on system. The repository's primary contents are the source code alongside several usage examples. Data and code used to generate the figures of the paper will shortly be made accessible in the Zenodo repository [3]. For users interested in using this code or with inquiries, please feel free to contact us via the email addresses listed in the paper.
+# How to get started
 
-## Contents
-- `/tdwg` - Source code used for this work includes:
-    - `/datasets`
-        - `mnist_dataset.py` - Script for downloading and preprocessing the MNIST dataset.
-        - `vowel_dataset.csv` - Dataset used for vowel classification.
-        - `vowels_dataset.py` - Script for loading the vowel dataset.
-    - `/lib` - Key files include
-        - `simulation.py` - Script for simulating the 2D-programmable waveguide.
-        - `exp_sim_converter.py` - Script for translating simulation and experimental parameters and outputs between the two.
-        - `tdwgnet.py` - Script defining a PyTorch nn.Module that represents the 2D-programmable waveguide, with built-in functionality for training it with physics-aware training [2].
-        - Key scripts for interfacing with experimental devices include `line_camera.py`, `PCIe_beamshaper.py`, `DMD.py`.
-- `/examples` - Jupyter notebooks that demonstrate the use of the source code, including:
-    - `calibration of the physics-based model.ipynb` - Notebook for calibrating the physics-based model using the beamshaper and writing specific patterns to the DMD.
-    - `vowel classification with tdwg.ipynb` - Notebook for training the 2D-programmable waveguide to classify vowels, including code for data-driven refinement of the physics-based model.
-    - `MNIST classification with tdwg.ipynb` - Notebook for training the 2D-programmable waveguide to classify MNIST digits.
+Each of the following bulletpoints can be clicked for further information:
+
+<details> <summary><b>Installing dependencies</b></summary>
+  
+---
+Please ensure that the correct versions of all packages specified in 
+[environment.yml](https://github.com/ms3452/2D-waveguide-demo-code/blob/main/environment.yml) are installed. If using anaconda, the easiest way to do so is to clone the repository, open an anaconda prompt in the repository folder, and execute:
+  ```
+  conda env create -f environment.yml
+  conda activate 2Dwg
+  ```
+This creates and activates an environment called `2Dwg`.
+To run the code, launch Jupyter Lab by executing
+```
+jupyter lab
+```
+in the anaconda prompt.
+
+By default, the provided environment.yml installs a CPU-only version of PyTorch. To enable GPU acceleration, first create and activate the environment as described above, then additionally run
+```
+conda install pytorch-cuda=11.8 -c nvidia -c pytorch
+```
+This upgrades the environment to use GPU builds of PyTorch and TorchVision. CPU users can ignore this step.
+
+---
+
+</details> <details> <summary><b>Simplest simulation</b> of a refractive-index pattern</summary>
+
+---
+[Example 1](https://github.com/ms3452/2D-waveguide-demo-code/blob/main/Example%201%20Y-splitter.ipynb) provides code that manually defines the refractive-index distribution of a Y-splitter and simulates beam propagation through it. Parameters of this simulation are similar to the experimental results presented in Fig. 2 of our paper.
+
+---
+
+</details> <details> <summary><b>Inverse design</b> of a refractive-index pattern</summary>
+
+---
+[Example 2](https://github.com/ms3452/2D-waveguide-demo-code/blob/main/Example%202%20Inverse%20design.ipynb) contains a minimal inverse-design example that automatically generates a refractive-index distribution for converting Gaussian beams into Hermite–Gauss modes. Inverse-design is performed via the auto-differentiable simulation of the programmable waveguide with *PyTorch*.
+
+---
+
+</details> <details> <summary><b>Machine learning demo</b> with MNIST</summary>
+
+---
+[Example 3](https://github.com/ms3452/2D-waveguide-demo-code/blob/main/Example%203%20MNIST%20classification.ipynb) demonstrates MNIST image classification using a 2D-programmable waveguide. Parameters of this simulation are similar to experimental results presented in Fig. 4 of our paper.
+
+---
+
+</details> <details> <summary><b>High-dimensional MVMs</b> in multimode waveguides</summary>
+
+---
+[Example 5](https://github.com/ms3452/2D-waveguide-demo-code/blob/main/Example%205%20Matrix-vector-multiplication%20in%20multimode%20waveguide.ipynb) shows how to compute a refractive-index distribution that, embedded in a multimode waveguide, performs a desired 100×100-dimensional unitary transformation.
+[Example 4](https://github.com/ms3452/2D-waveguide-demo-code/blob/main/Example%204%20Mode%20conversion%20in%20multimode%20waveguide.ipynb) contains simpler code that introduces a step-index multimode waveguide as background refractive index and demonstrates mode conversion using a manually defined refractive-index distribution.
+These notebooks can be readily adapted to replicate the results presented in Fig. 5 of our paper.
+
+---
+
+</details> <details> <summary><b>Physics-aware training</b> with mismatched forward/backward passes</summary>
+
+---
+[Example 6](https://github.com/ms3452/2D-waveguide-demo-code/blob/main/Example%206%20Mismatched%20forward-backward%20pass.ipynb) is a minimal inverse-design notebook using a mismatched forward and backward pass, similar to the approach used in our optical experiments with the 2D-programmable waveguide.
+This notebook can used to *design* an artificial simulation-reality gap and explore whether the training algorithm can succesfully train the programmable waveguide despite the discrepancy.
+
+---
+
+</details>
 
 
-## References
-[1]: T. Onodera*, M.M. Stein*, B.A. Ash, M.M. Sohoni, M. Bosch, R. Yanagimoto, M. Jankowski, T.P. McKenna, T. Wang, G. Shvets, M.R. Shcherbakov, L.G. Wright, P.L. McMahon, "Scaling On-chip Photonic Neural Processors Using Arbitrarily Programmable Wave Propagation", ArXiv: 2402.17750 (2024). https://arxiv.org/abs/2402.17750
+# How to cite this code
 
-[2]: L.G. Wright*, T. Onodera*, M.M. Stein, T. Wang, D.T. Schachter, Z. Hu & P.L. McMahon, "Deep physical neural networks trained with backpropagation", _Nature_ **601**, 549–555 (2022).
+If you use this code in your research, please consider citing the following paper:
 
-[3]: Data and Code for "Scaling On-chip Photonic Neural Processors Using Arbitrarily Programmable Wave Propagation", Zenodo. In preparation.
+> Onodera, T., Stein, M. M., et al (2024). Scaling on-chip photonic neural processors using arbitrarily programmable wave propagation. *arXiv:2402.17750* https://arxiv.org/abs/2402.17750v1.
 
-## License
+# License
 
-The code in this repository is released under the following license:
+This repository is licensed under:
 
 [Creative Commons Attribution 4.0 International](https://creativecommons.org/licenses/by/4.0/)
 
-A copy of this license is given in this repository as [license.txt](https://github.com/mcmahon-lab/2D-programmable-waveguide/blob/master/license.txt).
+A copy of the license is included in this repository as [license.txt](https://github.com/ms3452/2D-waveguide-demo-code/blob/main/license.txt).
