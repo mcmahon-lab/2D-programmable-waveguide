@@ -1,3 +1,5 @@
 .ipynb_checkpoints/
+tdwg_lib/.ipynb_checkpoints/
+tdwg_lib/__pycache__/
 data/
 *.pt

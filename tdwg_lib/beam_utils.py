@@ -1,3 +1,15 @@
+"""
+Beam and mode generation utilities for 2D waveguide simulations.
+
+This module provides functions for creating optical field distributions:
+- Gaussian beams with configurable waist, position, and phase
+- Hermite-Gauss (HG) mode sets using stable recurrence relations
+- Boxed (piecewise-constant) modes emulating bucket detectors
+
+All functions support PyTorch tensors and GPU acceleration, with automatic
+discrete L2 normalization.
+"""
+
 import torch
 import math 
 
@@ -11,7 +23,6 @@ def gaussian_beam(
     dtype=torch.complex128,
 ):
     """
-    [ChatGPT-created]
     Fundamental Gaussian beam sampled at longitudinal offset z0 from the waist (focus).
 
     Parameters
@@ -74,7 +85,6 @@ def make_HG_modes(x_axis: torch.Tensor,
                   *,
                   dtype=torch.float64) -> torch.Tensor:
     """
-    [ChatGPT-created]
     Return (n, Nx) tensor of 1D Hermite–Gauss modes centered at x_center with waist w0,
     orthonormal on the *continuous* line (up to discretization error),
     evaluated on x_axis. Output dtype is complex128 (real values cast to complex).
@@ -150,7 +160,29 @@ def make_HG_modes(x_axis: torch.Tensor,
     return modes
 
 def make_boxed_modes(x_axis, N, xmode_out_lim, separation = 0):
-    x2ind = lambda x: torch.argmin(torch.abs(x_axis-x)) 
+    """
+    Generate N boxed (piecewise-constant) modes emulating bucket detectors.
+
+    Creates N rectangular modes evenly distributed across the transverse axis,
+    useful for modeling discrete detector arrays or spatial mode projections.
+
+    Inputs:
+    -------
+    x_axis : torch.Tensor, shape (Nx,)
+        Transverse coordinate grid.
+    N : int
+        Number of boxed modes to generate.
+    xmode_out_lim : float
+        Half-width of the region containing all modes (modes span from -xmode_out_lim to +xmode_out_lim).
+    separation : float, default 0
+        Gap between adjacent modes in same units as x_axis.
+
+    Returns:
+    --------
+    output_modes : torch.Tensor, shape (N, Nx)
+        Array of N boxed modes, each row is a piecewise-constant mode with value 1 in its region, 0 elsewhere.
+    """
+    x2ind = lambda x: torch.argmin(torch.abs(x_axis-x))
     out_xsep_list = torch.linspace(-xmode_out_lim, xmode_out_lim, N+1)
     output_modes = []
     for i in range(N):

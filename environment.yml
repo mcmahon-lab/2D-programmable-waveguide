@@ -2,6 +2,7 @@ name: 2Dwg
 channels:
   - pytorch
   - defaults
+  - conda-forge 
 dependencies:
   - python=3.12
   - jupyterlab
@@ -10,3 +11,4 @@ dependencies:
   - matplotlib=3.8.4
   - pytorch=2.5.0
   - torchvision=0.20.0
+  - scikit-learn=1.5.1
